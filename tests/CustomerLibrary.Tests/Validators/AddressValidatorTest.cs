@@ -1,11 +1,14 @@
 ﻿namespace CustomerLibrary.Tests
 {
+    [Collection("CustomerLibraryTests")]
     public class AddressValidatorTest
     {
-        [Fact]
-        public void ShouldReturnAddressLineRequired()
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void ShouldReturnAddressLineRequired(string addressLine)
         {
-            var address = new Address("", "", AddressType.Shipping, "city", "postalcode", "state", "country");
+            var address = new Address { AddressLine = addressLine };
 
             var actual = AddressValidator.Validate(address);
 
@@ -15,7 +18,7 @@
         [Fact]
         public void ShouldReturnAddressLineTooLong()
         {
-            var address = new Address(new string('a', 101), "", AddressType.Shipping, "city", "postalcode", "state", "country");
+            var address = new Address { AddressLine = new string('a', 101) };
 
             var actual = AddressValidator.Validate(address);
 
@@ -25,7 +28,7 @@
         [Fact]
         public void ShouldNotReturnWrongAddressLine()
         {
-            var address = new Address("correct address line", "", AddressType.Shipping, "city", "postalcode", "state", "country");
+            var address = new Address { AddressLine = "address line" };
 
             var actual = AddressValidator.Validate(address);
 
@@ -36,7 +39,7 @@
         [Fact]
         public void ShouldReturnAddressLine2TooLong()
         {
-            var address = new Address("address", new string('a', 101), AddressType.Shipping, "city", "postalcode", "state", "country");
+            var address = new Address { AddressLine2 = new string('a', 101) };
 
             var actual = AddressValidator.Validate(address);
 
@@ -44,32 +47,34 @@
         }
 
         [Theory]
-        [InlineData("")]
         [InlineData("correct address line 2")]
+        [InlineData("")]
+        [InlineData(null)]
         public void ShouldNotReturnWrongAddressLine2(string addressLine2)
         {
-            var address = new Address("address", addressLine2, AddressType.Shipping, "city", "postalcode", "state", "country");
+            var address = new Address { AddressLine2 = addressLine2 };
 
             var actual = AddressValidator.Validate(address);
 
             Assert.DoesNotContain("Address Line 2 too long", actual);
         }
 
-        [Fact]
-        public void ShouldReturnCityRequired()
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void ShouldReturnCityRequired(string city)
         {
-            var address = new Address("address", "", AddressType.Shipping, "", "postalcode", "state", "country");
+            var address = new Address { City = city };
 
             var actual = AddressValidator.Validate(address);
 
             Assert.Contains("City required", actual);
         }
 
-
         [Fact]
         public void ShouldReturnCityTooLong()
         {
-            var address = new Address("address", "", AddressType.Shipping, new string('a', 51), "postalcode", "state", "country");
+            var address = new Address { City = new string('a', 51) };
 
             var actual = AddressValidator.Validate(address);
 
@@ -79,7 +84,7 @@
         [Fact]
         public void ShouldNotReturnWrongCity()
         {
-            var address = new Address("address", "", AddressType.Shipping, "city", "postalcode", "state", "country");
+            var address = new Address { City = "city" };
 
             var actual = AddressValidator.Validate(address);
 
@@ -87,10 +92,12 @@
             Assert.DoesNotContain("City too long", actual);
         }
 
-        [Fact]
-        public void ShouldReturnPostalCodeRequired()
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void ShouldReturnPostalCodeRequired(string postalCode)
         {
-            var address = new Address("address", "", AddressType.Shipping, "city", "", "state", "country");
+            var address = new Address { PostalCode = postalCode };
 
             var actual = AddressValidator.Validate(address);
 
@@ -100,7 +107,7 @@
         [Fact]
         public void ShouldReturnPostalCodeTooLong()
         {
-            var address = new Address("address", "", AddressType.Shipping, "city", new string('a', 7), "state", "country");
+            var address = new Address { PostalCode = new string('1', 7) };
 
             var actual = AddressValidator.Validate(address);
 
@@ -110,7 +117,7 @@
         [Fact]
         public void ShouldNotReturnWrongPostalCode()
         {
-            var address = new Address("address", "", AddressType.Shipping, "city", "postal", "state", "country");
+            var address = new Address { PostalCode = "123456" };
 
             var actual = AddressValidator.Validate(address);
 
@@ -118,10 +125,12 @@
             Assert.DoesNotContain("Postal Code too long", actual);
         }
 
-        [Fact]
-        public void ShouldReturnStateRequired()
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void ShouldReturnStateRequired(string state)
         {
-            var address = new Address("address", "", AddressType.Shipping, "city", "postalcode", "", "country");
+            var address = new Address { State = state };
 
             var actual = AddressValidator.Validate(address);
 
@@ -131,7 +140,7 @@
         [Fact]
         public void ShouldReturnStateTooLong()
         {
-            var address = new Address("address", "", AddressType.Shipping, "city", "postalcode", new string('a', 21), "country");
+            var address = new Address { State = new string('a', 21) };
 
             var actual = AddressValidator.Validate(address);
 
@@ -141,7 +150,7 @@
         [Fact]
         public void ShouldNotReturnWrongState()
         {
-            var address = new Address("address", "", AddressType.Shipping, "city", "postalcode", "state", "country");
+            var address = new Address { State = "state" };
 
             var actual = AddressValidator.Validate(address);
 
@@ -152,23 +161,27 @@
         [Fact]
         public void ShouldReturnWrongCountry()
         {
-            var address = new Address("address", "", AddressType.Shipping, "city", "postalcode", "state", "country");
+            var address = new Address { Country = "country" };
 
             var actual = AddressValidator.Validate(address);
 
-            Assert.Contains("Wrong Country", actual);
+            Assert.Contains("Country wrong or unavailable", actual);
         }
 
         [Theory]
         [InlineData("United States")]
+        [InlineData("united states")]
+        [InlineData("UNITED STATES")]
         [InlineData("Canada")]
+        [InlineData("canada")]
+        [InlineData("CANADA")]
         public void ShouldNotReturnWrongCountry(string country)
         {
-            var address = new Address("address", "", AddressType.Shipping, "city", "postalcode", "state", country);
+            var address = new Address { Country = country };
 
             var actual = AddressValidator.Validate(address);
 
-            Assert.DoesNotContain("Wrong Country", actual);
+            Assert.DoesNotContain("Country wrong or unavailable", actual);
         }
     }
 }
