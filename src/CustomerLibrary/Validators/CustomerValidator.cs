@@ -4,45 +4,54 @@ namespace CustomerLibrary
 {
     public class CustomerValidator
     {
-        const string LONG_FIRST_NAME = "First Name too long";
-        const string EMPTY_LAST_NAME = "Last Name required";
-        const string LONG_LAST_NAME = "Last Name too long";
-        const string EMPTY_ADDRESS_LIST = "At least one Address required";
-        const string WRONG_PHONE_NUMBER = "Incorrect Phone Number format";
-        const string WRONG_EMAIL = "Incorrect Email format";
-        const string EMPTY_NOTES = "At least one Note required";
+        const int FirstNameMaxLength = 50;
+        const int LastNameMaxLength = 50;
+        const string PhoneNumberRegex = "^(\\+1|1)?([2-9]\\d\\d[2-9]\\d{6})$";
+        const string EmailRegex = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$";
+        const string LongFirstName = "First Name too long";
+        const string EmptyLastName = "Last Name required";
+        const string LongLastName = "Last Name too long";
+        const string EmptyAddressList = "At least one Address required";
+        const string WrongPhoneNumber = "Incorrect Phone Number format";
+        const string WrongEmail = "Incorrect Email format";
+        const string EmptyNotes = "At least one Note required";
 
         public static List<string> Validate(Customer customer)
         {
             var errorList = new List<string>();
 
-            if (customer.FirstName.Length > 50)
+            if (!string.IsNullOrEmpty(customer.FirstName) && customer.FirstName.Length > FirstNameMaxLength)
             {
-                errorList.Add(LONG_FIRST_NAME);
+                errorList.Add(LongFirstName);
             }
+
             if (string.IsNullOrWhiteSpace(customer.LastName))
             {
-                errorList.Add(EMPTY_LAST_NAME);
+                errorList.Add(EmptyLastName);
             }
-            if (customer.LastName.Length > 50)
+            else if (customer.LastName.Length > LastNameMaxLength)
             {
-                errorList.Add(LONG_LAST_NAME);
+                errorList.Add(LongLastName);
             }
-            if (customer.AddressList.Count == 0)
+
+            if (customer.AddressList == null || !customer.AddressList.Any())
             {
-                errorList.Add(EMPTY_ADDRESS_LIST);
+                errorList.Add(EmptyAddressList);
             }
-            if (!Regex.IsMatch(customer.PhoneNumber, "^(\\+1|1)?([2-9]\\d\\d[2-9]\\d{6})$"))
+
+            if (!string.IsNullOrEmpty(customer.PhoneNumber) && !Regex.IsMatch(customer.PhoneNumber, PhoneNumberRegex))
             {
-                errorList.Add(WRONG_PHONE_NUMBER);
+                errorList.Add(WrongPhoneNumber);
             }
-            if (!Regex.IsMatch(customer.Email, "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$"))
+
+            if (!string.IsNullOrEmpty(customer.Email) && !Regex.IsMatch(customer.Email, EmailRegex))
             {
-                errorList.Add(WRONG_EMAIL);
+                errorList.Add(WrongEmail);
             }
-            if (customer.Notes.Count == 0)
+
+            if (!customer.Notes.Any())
             {
-                errorList.Add(EMPTY_NOTES);
+                errorList.Add(EmptyNotes);
             }
 
             return errorList;
