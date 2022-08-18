@@ -1,5 +1,6 @@
 ﻿namespace CustomerLibrary.Tests
 {
+    [Collection("CustomerLibraryTests")]
     public class CustomerTest
     {
         [Fact]
