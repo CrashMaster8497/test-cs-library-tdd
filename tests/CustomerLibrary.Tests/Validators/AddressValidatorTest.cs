@@ -1,8 +1,12 @@
-﻿namespace CustomerLibrary.Tests
+﻿using FluentValidation.TestHelper;
+
+namespace CustomerLibrary.Tests
 {
     [Collection("CustomerLibraryTests")]
     public class AddressValidatorTest
     {
+        private readonly AddressValidator validator = new AddressValidator();
+
         [Theory]
         [InlineData("")]
         [InlineData(null)]
@@ -10,9 +14,9 @@
         {
             var address = new Address { AddressLine = addressLine };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.Contains("Address Line required", actual);
+            result.ShouldHaveValidationErrorFor(address => address.AddressLine).WithErrorMessage("Address Line required");
         }
 
         [Fact]
@@ -20,9 +24,9 @@
         {
             var address = new Address { AddressLine = new string('a', 101) };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.Contains("Address Line too long", actual);
+            result.ShouldHaveValidationErrorFor(address => address.AddressLine).WithErrorMessage("Address Line too long");
         }
 
         [Fact]
@@ -30,10 +34,9 @@
         {
             var address = new Address { AddressLine = "address line" };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.DoesNotContain("Address Line required", actual);
-            Assert.DoesNotContain("Address Line too long", actual);
+            result.ShouldNotHaveValidationErrorFor(address => address.AddressLine);
         }
 
         [Fact]
@@ -41,9 +44,9 @@
         {
             var address = new Address { AddressLine2 = new string('a', 101) };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.Contains("Address Line 2 too long", actual);
+            result.ShouldHaveValidationErrorFor(address => address.AddressLine2).WithErrorMessage("Address Line 2 too long");
         }
 
         [Theory]
@@ -54,9 +57,9 @@
         {
             var address = new Address { AddressLine2 = addressLine2 };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.DoesNotContain("Address Line 2 too long", actual);
+            result.ShouldNotHaveValidationErrorFor(address => address.AddressLine2);
         }
 
         [Theory]
@@ -66,9 +69,9 @@
         {
             var address = new Address { City = city };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.Contains("City required", actual);
+            result.ShouldHaveValidationErrorFor(address => address.City).WithErrorMessage("City required");
         }
 
         [Fact]
@@ -76,9 +79,9 @@
         {
             var address = new Address { City = new string('a', 51) };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.Contains("City too long", actual);
+            result.ShouldHaveValidationErrorFor(address => address.City).WithErrorMessage("City too long");
         }
 
         [Fact]
@@ -86,10 +89,9 @@
         {
             var address = new Address { City = "city" };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.DoesNotContain("City required", actual);
-            Assert.DoesNotContain("City too long", actual);
+            result.ShouldNotHaveValidationErrorFor(address => address.City);
         }
 
         [Theory]
@@ -99,9 +101,9 @@
         {
             var address = new Address { PostalCode = postalCode };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.Contains("Postal Code required", actual);
+            result.ShouldHaveValidationErrorFor(address => address.PostalCode).WithErrorMessage("Postal Code required");
         }
 
         [Fact]
@@ -109,9 +111,9 @@
         {
             var address = new Address { PostalCode = new string('1', 7) };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.Contains("Postal Code too long", actual);
+            result.ShouldHaveValidationErrorFor(address => address.PostalCode).WithErrorMessage("Postal Code too long");
         }
 
         [Fact]
@@ -119,10 +121,9 @@
         {
             var address = new Address { PostalCode = "123456" };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.DoesNotContain("Postal Code required", actual);
-            Assert.DoesNotContain("Postal Code too long", actual);
+            result.ShouldNotHaveValidationErrorFor(address => address.PostalCode);
         }
 
         [Theory]
@@ -132,9 +133,9 @@
         {
             var address = new Address { State = state };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.Contains("State required", actual);
+            result.ShouldHaveValidationErrorFor(address => address.State).WithErrorMessage("State required");
         }
 
         [Fact]
@@ -142,9 +143,9 @@
         {
             var address = new Address { State = new string('a', 21) };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.Contains("State too long", actual);
+            result.ShouldHaveValidationErrorFor(address => address.State).WithErrorMessage("State too long");
         }
 
         [Fact]
@@ -152,10 +153,9 @@
         {
             var address = new Address { State = "state" };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.DoesNotContain("State required", actual);
-            Assert.DoesNotContain("State too long", actual);
+            result.ShouldNotHaveValidationErrorFor(address => address.State);
         }
 
         [Fact]
@@ -163,9 +163,9 @@
         {
             var address = new Address { Country = "country" };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.Contains("Country wrong or unavailable", actual);
+            result.ShouldHaveValidationErrorFor(address => address.Country).WithErrorMessage("Country wrong or unavailable");
         }
 
         [Theory]
@@ -179,9 +179,9 @@
         {
             var address = new Address { Country = country };
 
-            var actual = AddressValidator.Validate(address);
+            var result = validator.TestValidate(address);
 
-            Assert.DoesNotContain("Country wrong or unavailable", actual);
+            result.ShouldNotHaveValidationErrorFor(address => address.Country);
         }
     }
 }
