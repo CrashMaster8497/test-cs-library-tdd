@@ -1,20 +1,19 @@
-﻿namespace CustomerLibrary.Tests
+﻿using FluentValidation.TestHelper;
+
+namespace CustomerLibrary.Tests
 {
     public class CustomerValidatorTest
     {
-        private static IEnumerable<object[]> GenerateEmptyAddressList()
-        {
-            yield return new object[] { new List<Address>() };
-        }
+        private readonly CustomerValidator validator = new CustomerValidator();
 
         [Fact]
         public void ShouldReturnFirstNameTooLong()
         {
             var customer = new Customer { FirstName = new string('a', 51) };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("First Name too long", actual);
+            result.ShouldHaveValidationErrorFor(customer => customer.FirstName).WithErrorMessage("First Name too long");
         }
 
         [Theory]
@@ -25,9 +24,9 @@
         {
             var customer = new Customer { FirstName = firstName };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.DoesNotContain("First Name too long", actual);
+            result.ShouldNotHaveValidationErrorFor(customer => customer.FirstName);
         }
 
         [Theory]
@@ -37,9 +36,9 @@
         {
             var customer = new Customer { LastName = lastName };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("Last Name required", actual);
+            result.ShouldHaveValidationErrorFor(customer => customer.LastName).WithErrorMessage("Last Name required");
         }
 
         [Fact]
@@ -47,9 +46,9 @@
         {
             var customer = new Customer { LastName = new string('a', 51) };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("Last Name too long", actual);
+            result.ShouldHaveValidationErrorFor(customer => customer.LastName).WithErrorMessage("Last Name too long");
         }
 
         [Fact]
@@ -57,10 +56,9 @@
         {
             var customer = new Customer { LastName = "last" };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.DoesNotContain("Last Name required", actual);
-            Assert.DoesNotContain("Last Name too long", actual);
+            result.ShouldNotHaveValidationErrorFor(customer => customer.LastName);
         }
 
         [Theory]
@@ -70,9 +68,9 @@
         {
             var customer = new Customer { AddressList = addressList };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("At least one Address required", actual);
+            result.ShouldHaveValidationErrorFor(customer => customer.AddressList).WithErrorMessage("At least one Address required");
         }
 
         [Fact]
@@ -80,9 +78,9 @@
         {
             var customer = new Customer { AddressList = new List<Address> { new Address() } };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.DoesNotContain("At least one Address required", actual);
+            result.ShouldNotHaveValidationErrorFor(customer => customer.AddressList);
         }
 
         [Theory]
@@ -95,9 +93,9 @@
         {
             var customer = new Customer { PhoneNumber = phoneNumber };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("Incorrect Phone Number format", actual);
+            result.ShouldHaveValidationErrorFor(customer => customer.PhoneNumber).WithErrorMessage("Incorrect Phone Number format");
         }
 
         [Theory]
@@ -110,9 +108,9 @@
         {
             var customer = new Customer { PhoneNumber = phoneNumber };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.DoesNotContain("Incorrect Phone Number format", actual);
+            result.ShouldNotHaveValidationErrorFor(customer => customer.PhoneNumber);
         }
 
         [Theory]
@@ -125,9 +123,9 @@
         {
             var customer = new Customer { Email = email };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("Incorrect Email format", actual);
+            result.ShouldHaveValidationErrorFor(customer => customer.Email).WithErrorMessage("Incorrect Email format");
         }
 
         [Theory]
@@ -138,19 +136,21 @@
         {
             var customer = new Customer { Email = email };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.DoesNotContain("Incorrect Email format", actual);
+            result.ShouldNotHaveValidationErrorFor(customer => customer.Email);
         }
 
-        [Fact]
-        public void ShouldReturnNoteRequired()
+        [Theory]
+        [InlineData(null)]
+        [MemberData(nameof(GenerateEmptyNotes))]
+        public void ShouldReturnNoteRequired(List<string> notes)
         {
-            var customer = new Customer { Notes = new List<string>() };
+            var customer = new Customer { Notes = notes };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("At least one Note required", actual);
+            result.ShouldHaveValidationErrorFor(customer => customer.Notes).WithErrorMessage("At least one Note required");
         }
 
         [Fact]
@@ -158,9 +158,19 @@
         {
             var customer = new Customer { Notes = new List<string> { string.Empty } };
 
-            var actual = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.DoesNotContain("At least one Note required", actual);
+            result.ShouldNotHaveValidationErrorFor(customer => customer.Notes);
+        }
+
+        private static IEnumerable<object[]> GenerateEmptyAddressList()
+        {
+            yield return new object[] { new List<Address>() };
+        }
+
+        private static IEnumerable<object[]> GenerateEmptyNotes()
+        {
+            yield return new object[] { new List<string>() };
         }
     }
 }
