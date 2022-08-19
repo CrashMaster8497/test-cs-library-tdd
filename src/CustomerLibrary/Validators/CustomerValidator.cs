@@ -1,8 +1,8 @@
-﻿using System.Text.RegularExpressions;
+﻿using FluentValidation;
 
 namespace CustomerLibrary
 {
-    public class CustomerValidator
+    public class CustomerValidator : AbstractValidator<Customer>
     {
         const int FirstNameMaxLength = 50;
         const int LastNameMaxLength = 50;
@@ -16,45 +16,21 @@ namespace CustomerLibrary
         const string WrongEmail = "Incorrect Email format";
         const string EmptyNotes = "At least one Note required";
 
-        public static List<string> Validate(Customer customer)
+        public CustomerValidator()
         {
-            var errorList = new List<string>();
-
-            if (!string.IsNullOrEmpty(customer.FirstName) && customer.FirstName.Length > FirstNameMaxLength)
-            {
-                errorList.Add(LongFirstName);
-            }
-
-            if (string.IsNullOrWhiteSpace(customer.LastName))
-            {
-                errorList.Add(EmptyLastName);
-            }
-            else if (customer.LastName.Length > LastNameMaxLength)
-            {
-                errorList.Add(LongLastName);
-            }
-
-            if (customer.AddressList == null || !customer.AddressList.Any())
-            {
-                errorList.Add(EmptyAddressList);
-            }
-
-            if (!string.IsNullOrEmpty(customer.PhoneNumber) && !Regex.IsMatch(customer.PhoneNumber, PhoneNumberRegex))
-            {
-                errorList.Add(WrongPhoneNumber);
-            }
-
-            if (!string.IsNullOrEmpty(customer.Email) && !Regex.IsMatch(customer.Email, EmailRegex))
-            {
-                errorList.Add(WrongEmail);
-            }
-
-            if (!customer.Notes.Any())
-            {
-                errorList.Add(EmptyNotes);
-            }
-
-            return errorList;
+            RuleFor(customer => customer.FirstName)
+                .MaximumLength(FirstNameMaxLength).WithMessage(LongFirstName);
+            RuleFor(customer => customer.LastName)
+                .NotEmpty().WithMessage(EmptyLastName)
+                .MaximumLength(LastNameMaxLength).WithMessage(LongLastName);
+            RuleFor(customer => customer.AddressList)
+                .NotEmpty().WithMessage(EmptyAddressList);
+            RuleFor(customer => customer.PhoneNumber)
+                .Matches(PhoneNumberRegex).WithMessage(WrongPhoneNumber);
+            RuleFor(customer => customer.Email)
+                .Matches(EmailRegex).WithMessage(WrongEmail);
+            RuleFor(customer => customer.Notes)
+                .NotEmpty().WithMessage(EmptyNotes);
         }
     }
 }

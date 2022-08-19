@@ -35,7 +35,7 @@
             Assert.NotNull(customer);
             Assert.Equal("first", customer.FirstName);
             Assert.Equal("last", customer.LastName);
-            Assert.Equal(new List<Address> (), customer.AddressList);
+            Assert.Equal(new List<Address>(), customer.AddressList);
             Assert.Equal("phone", customer.PhoneNumber);
             Assert.Equal("email", customer.Email);
             Assert.Equal(new List<string>(), customer.Notes);
